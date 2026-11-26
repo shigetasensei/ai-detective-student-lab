@@ -117,6 +117,26 @@
   /* Key word highlight: hover on computers, tap on tablets and phones */
   .box b, .q b { cursor:pointer; border-radius:6px; padding:0 3px; transition:background .2s, color .2s; }
   .box b:hover, .q b:hover, .box b.hl, .q b.hl { background:#fff176; color:#222; }
+  /* Accessibility */
+  .a11y { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding:10px; background:#fff; border-bottom:2px solid #ddd; }
+  .a11y button { border:2px solid #7c5cff; background:#fff; color:#4b2fa0; border-radius:999px; padding:8px 14px; font-weight:700; cursor:pointer; font-size:.95rem; }
+  .a11y button[aria-pressed=true] { background:#7c5cff; color:#fff; }
+  body.dark { background:#1b1f2c; color:#eef0f5; }
+  body.dark header { background:#2b2f6b; }
+  body.dark nav { background:#222736; border-color:#555; }
+  body.dark nav button { background:#2c3244; color:#dfe4f5; border-color:#4a5270; box-shadow:none; }
+  body.dark section { background:#262c3d; border-color:#3a4260; color:#eef0f5; }
+  body.dark h2, body.dark h3 { color:#ffd66b; }
+  body.dark .box { background:#3a3420; border-color:#7a6a2a; color:#f5f1e0; }
+  body.dark .q { background:#1f3a44; border-color:#3f7f8f; color:#eef8ff; }
+  body.dark .chip, body.dark .bin { background:#2c3244; color:#eef0f5; border-color:#4a5270; }
+  body.dark button.act { background:#2c3244; color:#eef0f5; border-color:#8c7cff; box-shadow:none; }
+  body.dark textarea, body.dark input[type=text] { background:#1b1f2c; color:#eef0f5; border-color:#4a5270; }
+  body.dark .fb.good { background:#1f3b26; color:#e6ffe9; }
+  body.dark .fb.bad { background:#3d2a1a; color:#fff3e6; }
+  body.big { font-size:23px; }
+  body.big .box, body.big .q, body.big button.act { font-size:1.2rem; }
+  body.big h2 { font-size:2rem; }
 </style>
 </head>
 <body>
@@ -126,6 +146,11 @@
   <div id="stars"></div>
 </header>
 <div id="toast"></div>
+<div class="a11y" role="toolbar" aria-label="Accessibility">
+  <button id="aDark" aria-pressed="false">🌙 Dark mode</button>
+  <button id="aBig" aria-pressed="false">🔠 Bigger text</button>
+  <button id="aEasy" aria-pressed="false">🧸 Easy English</button>
+</div>
 <nav>
   <button class="active" data-t="s0">Start</button>
   <button data-t="s7">Why do adults worry?</button>
@@ -628,6 +653,34 @@
   renderAi();
   // Tap or click a key word to highlight it
   document.querySelectorAll('.box b, .q b').forEach(b=>b.addEventListener('click',()=>b.classList.toggle('hl')));
+  // Accessibility: dark mode, bigger text, easy English
+  const easyText = {
+    s0:'AI can make words, pictures and voices that look real. Fake things can spread fast. Check before you share.',
+    s7:'Why do adults worry about you when you use AI?',
+    s8:'AI Mode writes a new summary from many pages. It is not one quote. Check it before you copy it.',
+    s1:'You cannot always tell real from AI. Think about how you decided.',
+    s2:'AI can help people. AI can also cause harm if people misuse it.',
+    s3:'AI can be wrong, even when it sounds sure. Fake facts can look real.',
+    s4:'Check WHO made it, WHEN it was made, and WHERE it came from.',
+    s5:'Websites and games want your attention. Do not share personal information.',
+    s6:'Every fact needs WHO, WHEN and WHERE.'
+  };
+  const aDark = document.getElementById('aDark'), aBig = document.getElementById('aBig'), aEasy = document.getElementById('aEasy');
+  function toggleBtn(btn, cls){ const on = document.body.classList.toggle(cls); btn.setAttribute('aria-pressed', on); }
+  aDark.addEventListener('click', ()=>toggleBtn(aDark, 'dark'));
+  aBig.addEventListener('click', ()=>toggleBtn(aBig, 'big'));
+  let easyOn = false;
+  aEasy.addEventListener('click', ()=>{
+    easyOn = !easyOn;
+    aEasy.setAttribute('aria-pressed', easyOn);
+    Object.keys(easyText).forEach(id=>{
+      const sec = document.getElementById(id);
+      const box = sec && sec.querySelector('.box');
+      if (!box) return;
+      if (box.dataset.orig === undefined) box.dataset.orig = box.innerHTML;
+      box.innerHTML = easyOn ? '<b>Big idea:</b> ' + easyText[id] : box.dataset.orig;
+    });
+  });
   drawStars();
 </script>
 </body>
