@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Detectives: Student Lab (Grade 5)</title>
+<style>
+  :root { --navy:#1e2a4a; --gold:#f5b700; --soft:#eef2fb; --ok:#2e7d32; --bad:#c62828; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Segoe UI", system-ui, sans-serif; background:var(--soft); color:#222; line-height:1.6; }
+  header { background:var(--navy); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.4rem; }
+  header p { margin:4px 0 0; opacity:.85; }
+  nav { display:flex; flex-wrap:wrap; gap:8px; padding:10px 20px; background:#fff; border-bottom:2px solid var(--gold); position:sticky; top:0; z-index:5; }
+  nav button { border:none; background:var(--soft); color:var(--navy); padding:8px 14px; border-radius:20px; cursor:pointer; font-weight:600; }
+  nav button.active { background:var(--navy); color:#fff; }
+  main { max-width:820px; margin:0 auto; padding:18px; }
+  section { display:none; background:#fff; border-radius:14px; padding:22px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+  section.show { display:block; }
+  h2 { color:var(--navy); margin-top:0; }
+  h3 { color:var(--navy); margin-bottom:4px; }
+  .box { background:#fffaf0; border-left:5px solid var(--gold); padding:10px 14px; border-radius:8px; margin:12px 0; }
+  .q { background:#f3f6fc; border:1px solid #c9d4ea; border-radius:10px; padding:14px; font-size:1.05rem; margin:10px 0; }
+  .btns { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  button.act { padding:9px 16px; border-radius:10px; border:2px solid var(--navy); background:#fff; color:var(--navy); font-weight:700; cursor:pointer; }
+  button.act.on { background:var(--navy); color:#fff; }
+  button.act:disabled { opacity:.45; cursor:default; }
+  .fb { padding:10px 12px; border-radius:8px; margin-top:8px; display:none; }
+  .fb.good { display:block; background:#e8f5e9; border-left:5px solid var(--ok); }
+  .fb.bad { display:block; background:#ffebee; border-left:5px solid var(--bad); }
+  .chip { display:inline-block; background:var(--soft); border:1px solid #9aa8c7; border-radius:8px; padding:6px 10px; margin:4px; cursor:pointer; }
+  .chip.sel { background:var(--gold); border-color:var(--gold); }
+  .bins { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-top:10px; }
+  .bin { border:2px dashed #9aa8c7; border-radius:10px; padding:8px; min-height:80px; background:#fff; }
+  .bin b { color:var(--navy); display:block; margin-bottom:4px; }
+  .bin .item { background:var(--soft); border-radius:6px; padding:4px 6px; margin:4px 0; font-size:.92rem; }
+  .checklist label { display:block; padding:6px 0; }
+  textarea, input[type=text] { width:100%; padding:10px; border:1px solid #9aa8c7; border-radius:8px; font:inherit; }
+  textarea { min-height:90px; }
+  .progress { height:8px; background:#dde3f0; border-radius:6px; overflow:hidden; margin:8px 0 14px; }
+  .progress div { height:100%; background:var(--gold); width:0; transition:width .3s; }
+  details { margin:8px 0; }
+  summary { cursor:pointer; font-weight:600; color:var(--navy); }
+  footer { text-align:center; font-size:.8rem; color:#666; padding:18px; }
+  /* Happy Grade 5 look */
+  body { font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif; font-size:18px; background: linear-gradient(160deg, #fff9d6 0%, #d9f7ff 50%, #e9fbe5 100%); min-height:100vh; }
+  header { background: linear-gradient(90deg, #7c5cff, #3fb8ff); border-bottom:6px solid #ffd23f; padding:22px 20px; }
+  header h1 { font-size:2rem; text-shadow:0 2px 0 rgba(0,0,0,.12); }
+  nav { background:#fffbe9; border-bottom:4px dashed #ffc83d; gap:10px; padding:14px 16px; }
+  nav button { background:#ffffff; color:#5a3fc0; border:3px solid #bfe9ff; border-radius:999px; padding:10px 18px; font-size:1rem; box-shadow:0 3px 0 #bfe9ff; }
+  nav button.active { background:#ffb347; border-color:#ffb347; color:#fff; box-shadow:0 3px 0 #e08a1e; }
+  section { border-radius:24px; padding:28px; border:3px solid #ffffff; box-shadow:0 6px 0 rgba(124,92,255,.12); }
+  h2 { font-size:1.7rem; color:#6a4bd6; }
+  h3 { font-size:1.25rem; color:#2a9d8f; }
+  .box { border-radius:18px; border:3px solid #ffe38a; background:#fffbe6; font-size:1.05rem; }
+  .q { border-radius:18px; background:#eefbff; border:3px solid #9ee3ff; font-size:1.15rem; }
+  button.act { border-radius:16px; border:3px solid #7c5cff; background:#ffffff; color:#6a4bd6; font-size:1.05rem; padding:12px 20px; box-shadow:0 5px 0 #c9b8ff; }
+  button.act:hover:not(:disabled) { transform:translateY(-2px); background:#f5f1ff; }
+  button.act.on { background:#7c5cff; color:#ffffff; }
+  .chip { border-radius:14px; padding:8px 12px; font-size:1rem; background:#e8fff1; border:2px solid #7fe0a6; }
+  .chip.sel { background:#ffe27a; border-color:#ffb300; }
+  .bin { background:#fffdf5; border:3px dashed #7fd1ff; border-radius:16px; }
+  .feedback, .fb.good { background:#e9fff0; }
+  .fb.bad { background:#fff4e0; border-left-color:#ffb020; }
+  details summary { font-size:1.1rem; }
+  #toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%) scale(0.9); background:#7c5cff; color:#fff; padding:14px 22px; border-radius:999px; font-size:1.2rem; font-weight:700; box-shadow:0 8px 20px rgba(0,0,0,.18); opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; z-index:20; }
+  #toast.show { opacity:1; transform:translateX(-50%) scale(1); }
+  #stars { font-weight:700; color:#fff; margin-top:8px; font-size:1.05rem; }
+  /* Phones and iPads */
+  html { -webkit-text-size-adjust:100%; }
+  @media (max-width: 1024px) {
+    main { max-width: 100%; padding: 14px; }
+  }
+  @media (max-width: 700px) {
+    body { font-size:17px; }
+    header { padding:16px 14px; }
+    header h1 { font-size:1.5rem; }
+    nav { position:static; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding:10px; gap:8px; }
+    nav button { flex:0 0 auto; min-height:44px; padding:10px 14px; font-size:1rem; white-space:nowrap; }
+    main { padding:10px; }
+    section { padding:18px; border-radius:18px; }
+    h2 { font-size:1.4rem; }
+    .q { font-size:1.05rem; padding:12px; }
+    .box { padding:12px; }
+    .btns { flex-direction:column; align-items:stretch; }
+    button.act { width:100%; min-height:52px; font-size:1.1rem; margin:4px 0; }
+    .bins { grid-template-columns:1fr; }
+    .bin { min-height:60px; }
+    .chip { display:block; font-size:1.05rem; padding:12px; margin:6px 0; }
+    .four { grid-template-columns:1fr; }
+    table { display:block; overflow-x:auto; font-size:.95rem; }
+    textarea { min-height:120px; font-size:1rem; }
+    input[type=text] { font-size:1rem; min-height:44px; }
+    details summary { padding:10px 0; min-height:44px; }
+    #toast { width:90%; text-align:center; font-size:1.05rem; }
+    #stars { font-size:1rem; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🔎 AI Detectives: Student Lab</h1>
+  <p>Grade 5 · Think, check and choose before you trust</p>
+  <div id="stars"></div>
+</header>
+<div id="toast"></div>
+<nav>
+  <button class="active" data-t="s0">Start</button>
+  <button data-t="s7">Why do adults worry?</button>
+  <button data-t="s8">Google AI Mode: check it</button>
+  <button data-t="s1">Lesson 1 · Real or AI?</button>
+  <button data-t="s2">Lesson 1 · Sort it</button>
+  <button data-t="s3">Lesson 2 · Detective game</button>
+  <button data-t="s4">Lesson 2 · Check it live</button>
+  <button data-t="s5">Good choices online</button>
+  <button data-t="s6">PYP Exhibition Rule</button>
+</nav>
+
+<main>
+
+<!-- START -->
+<section id="s0" class="show">
+  <h2>Welcome, Detectives</h2>
+  <div class="box"><b>Big idea:</b> AI can make text, pictures and voices that look and sound real. <b>Our concern:</b> a fake picture or quote can spread among classmates before anyone checks it.</div>
+  <p><b>Collect stars</b> by visiting each tab and getting answers right. <span id="starLine"></span></p>
+  <p>Work through the tabs in order. Each one takes about 5–10 minutes. Your teacher will tell you when to switch tabs.</p>
+  <div class="box"><b>Detective rule:</b> WHO made it? WHEN was it made? WHERE did it come from? WHY was it made?</div>
+</section>
+
+<!-- WHY ADULTS WORRY -->
+<section id="s7">
+  <h2>Why do adults worry about you using AI?</h2>
+  <div class="box"><b>Big question:</b> Why do the adults in your life worry about you using AI?</div>
+  <p><b>Step 1. Think alone (2 min).</b> Write one reason an adult might worry. Think about what could go wrong for a kid, not only what could go wrong with the AI.</p>
+  <textarea id="w1" placeholder="An adult might worry because..."></textarea>
+  <p><b>Step 2. Class sort (5 min).</b> Together, tap a worry card and then tap the column it belongs to. Ask the class: which column fits better, and why? Some worries could fit both.</p>
+  <div id="whyCards"></div>
+  <div class="bins" id="whyBins"></div>
+  <div class="fb" id="whyFb"></div>
+  <p><b>Step 3. Ask yourself (2 min).</b> Which worry is about me, and which is about the world? Then share with your neighbor.</p>
+  <p><b>Step 4. Flip it! 🙃 (1 min)</b> Become a superhero detective. Write one reason adults might be wrong to worry, or one way AI could be your superpower for learning.</p>
+  <div class="btns"><button class="act" id="flipBtn">🎲 Spin a flip card</button></div>
+  <div class="box" id="flipOut" style="display:none;"></div>
+  <textarea id="w4" placeholder="Adults might be wrong to worry because... / AI could help me learn by..."></textarea>
+  <div class="box"><b>Think about it:</b> Adults worry because they care about you. Which of these worries do you think is most important?</div>
+  <div class="box" style="background:#e8f4fd;border-left-color:#1565c0;"><b>Make a better choice?</b> Most AI chatbots and AI tools are made for people aged 13 or older, and some require people under 18 to have a parent's permission. Some are only for adults.<ul><li><b>ChatGPT:</b> 13 or older. Users under 18 need a parent's or guardian's permission.</li><li><b>Claude:</b> 18 or older.</li><li><b>Character.AI:</b> 13 or older to sign up, but users under 18 cannot have open-ended chats with AI characters.</li><li><b>Gemini (personal or school account):</b> 13, or the country's age if it is higher.</li></ul><b>Why do you think companies set these ages?</b> Think about privacy (what happens to what you type), safety (chats that can feel like a real friend), and content (what is suitable for your age). Discuss: what would you need to know before you used an AI tool built for adults?</div>
+</section>
+
+<!-- AI MODE -->
+<section id="s8">
+  <h2>Google AI Mode: check it</h2>
+  <div class="box"><b>Big idea:</b> An AI Mode answer is a new summary written from many pages. It is not one quote from one source. <b>Our concern:</b> reading a confident summary and copying it without checking which page said what.</div>
+
+  <h3>What is different?</h3>
+  <p><b>Sort it together!</b> Tap a statement, then tap the box it belongs to: <b>A quote</b> or <b>An AI Mode answer</b>. Some statements are tricky, so talk it through with your neighbor first.</p>
+  <div id="aiCards"></div>
+  <div class="bins" id="aiBins"></div>
+  <div class="fb" id="aiFb"></div>
+  <p>Google's own help page says to <b>check important information in more than one place</b> and to click the links for AI sources. Google also says AI Mode can break your question into smaller searches (called query fan-out) and combine what it finds.</p>
+
+  <h3>Check AI Mode in 5 steps</h3>
+  <div class="checklist">
+    <label><input type="checkbox"> 1. Ask the question (teacher runs the search on the classroom screen).</label>
+    <label><input type="checkbox"> 2. Find one sentence in the AI answer and write it down.</label>
+    <label><input type="checkbox"> 3. Click the link next to that sentence. Does the page say the same thing?</label>
+    <label><input type="checkbox"> 4. Open two normal search results (the links list). Do they agree with the AI answer?</label>
+    <label><input type="checkbox"> 5. Ask a follow-up question. Does the answer change? Which sources change?</label>
+  </div>
+  <textarea id="aim1" placeholder="My sentence from the AI answer was... The page said... / It did not say..."></textarea>
+
+  <h3>Quick check</h3>
+  <details><summary>1. Why is an AI Mode answer harder to check than a quote?</summary><p>Because the sentences are newly written, one sentence may come from several pages, and the links can change. You need to check each claim, not just trust the summary.</p></details>
+  <details><summary>2. Is it enough that the answer has links?</summary><p>No. A link shows where to look. You still need to open it, check the date and author, and see whether it really supports the sentence.</p></details>
+  <details><summary>3. What does WHO, WHEN, WHERE, WHY mean here?</summary><p>WHO wrote the linked page? WHEN was it written or updated? WHERE in the page is the claim? WHY was the page made (to inform, sell or persuade)?</p></details>
+
+  <div class="box"><b>Detective rule:</b> A summary is a starting point. Click, compare, and check before you use it.</div>
+</section>
+
+<!-- LESSON 1 REAL OR AI -->
+<section id="s1">
+  <h2>Real or AI?</h2>
+  <div class="box"><b>Big idea:</b> You cannot always tell by looking or listening. Think about how you decided.</div>
+  <div class="q"><b>Item 1:</b> A photo of a snowy mountain village with a sign in Japanese and English.</div>
+  <div class="btns" data-vote="1"><button class="act">Real</button><button class="act">AI</button></div>
+  <div class="q"><b>Item 2:</b> A sentence: "Our school's robot team designed a new gripper that works underwater."</div>
+  <div class="btns" data-vote="2"><button class="act">Real</button><button class="act">AI</button></div>
+  <div class="q"><b>Item 3:</b> A voice message that sounds like a friend asking you to send them money.</div>
+  <div class="btns" data-vote="3"><button class="act">Real</button><button class="act">AI</button></div>
+  <div class="fb" id="voteFb"></div>
+  <div class="box"><b>Reflect:</b> Which clue made you decide? Could the clue be faked? Write one idea in the box below.</div>
+  <textarea id="reflect1" placeholder="My clue was..."></textarea>
+</section>
+
+<!-- LESSON 1 SORT -->
+<section id="s2">
+  <h2>Sort it: how do people use generative AI?</h2>
+  <div class="box"><b>Big idea:</b> AI is used for many things. Some uses help people, and some uses can cause harm if misused.</div>
+  <p>Tap a card, then tap the bin where it belongs. Tap a card again to remove it.</p>
+  <div id="cards"></div>
+  <div class="bins" id="bins"></div>
+  <div class="fb" id="sortFb"></div>
+  <div class="box"><b>Discuss:</b> Which use could help our community? Which use could cause harm?</div>
+  <div class="box"><b>🎮 Want to learn more about AI?</b> Try the Day of AI trivia games: <a href="https://dayofai.org/games/trivia" target="_blank" rel="noopener">dayofai.org/games/trivia</a><br>Do not enter your personal information. Ask your teacher if you need to log in.</div>
+</section>
+
+<!-- GAME -->
+<section id="s3">
+  <h2>Detective game: check or trust?</h2>
+  <div class="box"><b>What is a chatbot?</b> A chatbot is a computer program you can talk or type to. It writes replies that sound like a person. Many chatbots use generative AI, which makes new sentences from patterns it learned, so a chatbot can be wrong even when it sounds sure. Gemini is one example of a chatbot.</div>
+  <div class="box" style="background:#e8f4fd;border-color:#9ee3ff;"><b>Using Gemini on your school account (for this unit only)</b>
+  <ul>
+    <li><b>Purpose:</b> Use Gemini to research our unit questions only. It is not for games, chatting or personal topics.</li>
+    <li><b>Check first:</b> Your teacher will confirm the school has turned Gemini on for students.</li>
+    <li><b>Your data:</b> Google says it does not use data from students' chats to train its models. Your teacher will confirm the school's current settings with IT.</li>
+    <li><b>Safety filters:</b> Gemini has guardrails, but they are not perfect. If a response seems wrong or unsafe, stop and tell your teacher.</li>
+    <li><b>Never share:</b> Your full name, address, phone number, passwords or photos of other people.</li>
+    <li><b>Check every answer:</b> Use WHO, WHEN, WHERE, WHY on the source Gemini gives you, and check it in a second place.</li>
+  </ul>
+  </div>
+  <div class="box"><b>Big idea:</b> AI can be confidently wrong. A made-up claim can look like a real fact.</div>
+  <div class="progress"><div id="bar"></div></div>
+  <p><b>Case <span id="num">1</span> of 6</b> · Score: <span id="score">0</span></p>
+  <div class="q" id="ans"></div>
+  <div class="box" id="clues"></div>
+  <div class="btns">
+    <button class="act" id="bCheck">🔍 Check the source first</button>
+    <button class="act" id="bTrust">✅ Trust it</button>
+  </div>
+  <div class="fb" id="gFb"></div>
+  <div class="btns"><button class="act" id="gNext" disabled>Next case →</button><button class="act" id="gRestart" style="display:none">Play again</button></div>
+</section>
+
+<!-- CHECK LIVE -->
+<section id="s4">
+  <h2>Check it live: two sources, one claim</h2>
+  <div class="box"><b>Big idea:</b> Every source, including AI, needs WHO, WHEN and WHERE. <b>Our concern:</b> copying an AI answer into research without checking.</div>
+  <p><b>Step 1.</b> Write one claim you want to check (from class, a book, or an AI answer).</p>
+  <input type="text" id="claim" placeholder="Our claim...">
+  <p><b>Step 2.</b> Tick each check you completed:</p>
+  <div class="checklist">
+    <label><input type="checkbox"> I found the original source (not only a copy).</label>
+    <label><input type="checkbox"> I found the date it was written or updated.</label>
+    <label><input type="checkbox"> I know who wrote it (a person, company, or AI model).</label>
+    <label><input type="checkbox"> I checked a second, independent source.</label>
+    <label><input type="checkbox"> I asked why it was made (WHY).</label>
+  </div>
+  <p><b>Step 3.</b> Decide:</p>
+  <div class="btns"><button class="act" data-d="Trust">Trust it</button><button class="act" data-d="Check more">Check more</button><button class="act" data-d="Do not use">Do not use it</button></div>
+  <div class="fb good" id="liveFb" style="display:none"></div>
+</section>
+
+<!-- GOOD CHOICES -->
+<section id="s5">
+  <h2>Good choices on websites and AI chats</h2>
+  <div class="box"><b>Big idea:</b> Websites and games are designed to get your attention, and sometimes your information. <b>Our concern:</b> sharing personal details with a site that should not have them.</div>
+  <p><b>Pause · Check · Choose.</b> For each case, pick the safe choice.</p>
+  <div class="q">A quiz says: "Enter your birthday and school to unlock your prize!"</div>
+  <div class="btns" data-c="1"><button class="act">Enter my details</button><button class="act">Close it and tell an adult</button></div>
+  <div class="q">An AI chat asks: "What is your home address so I can help you better?"</div>
+  <div class="btns" data-c="2"><button class="act">Type my address</button><button class="act">Do not share it and tell an adult</button></div>
+  <div class="q">A pop-up says: "Only 2 minutes left! Click now or lose everything!"</div>
+  <div class="btns" data-c="3"><button class="act">Click quickly</button><button class="act">Pause and close it</button></div>
+  <div class="fb" id="choiceFb"></div>
+</section>
+
+<!-- EXHIBITION RULE -->
+<section id="s6">
+  <h2>PYP Exhibition Rule</h2>
+  <div class="box"><b>Big idea:</b> Every fact in my PYP Exhibition needs WHO, WHEN and WHERE.</div>
+  <p>Finish the sentence, then copy it into your exhibition notes.</p>
+  <p>Every fact I use will have <input type="text" id="r1" placeholder="a source"> ...</p>
+  <p>I will check the <input type="text" id="r2" placeholder="WHO / WHEN / WHERE"> before I trust an AI answer.</p>
+  <p>If I am not sure, I will ask <input type="text" id="r3" placeholder="a trusted adult"> before I share.</p>
+  <div class="btns"><button class="act" id="mk">Show my rule</button><button class="act" id="cp">Copy rule</button></div>
+  <div class="q" id="rule" style="display:none"></div>
+</section>
+
+</main>
+<footer>AI Detectives · Grade 5 PYP Exhibition preparation</footer>
+
+<script>
+  // Navigation
+  const navBtns = document.querySelectorAll('nav button');
+  function go(id){
+    document.querySelectorAll('main section').forEach(s=>s.classList.toggle('show', s.id===id));
+    navBtns.forEach(b=>b.classList.toggle('active', b.dataset.t===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.t)));
+
+  // Lesson 1: real or AI (answers: 1 AI, 2 Real, 3 AI-voice possible, teaching reveal)
+  const voteAns = {1:'AI', 2:'Real', 3:'AI'};
+  const voteWhy = {
+    1:'Often AI-made. Check for odd text on signs, uneven shapes or blur. Still: a photo can be real even if it looks unusual.',
+    2:'This sentence can be checked: ask who wrote it and find the robot team\'s own page.',
+    3:'Voices can be copied. Never send money because of one message: call the friend on a number you already know.'
+  };
+  let votes = 0, total = 0;
+  document.querySelectorAll('[data-vote]').forEach(row=>{
+    const id = row.dataset.vote;
+    row.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+      if (row.dataset.done) return;
+      row.dataset.done = '1';
+      const pick = b.textContent.trim();
+      const right = pick === voteAns[id];
+      b.classList.add('on');
+      row.querySelectorAll('button').forEach(x=>x.disabled=true);
+      total++; if(right) votes++;
+      const fb = document.getElementById('voteFb');
+      fb.className = 'fb ' + (right?'good':'bad');
+      fb.innerHTML = (right?'Correct. ':'Not quite. The answer is ' + voteAns[id] + '. ') + voteWhy[id];
+    }));
+  });
+
+  // Lesson 1: sort it
+  const cards = [
+    {t:'Help people learn: practise a language with feedback', b:'help'},
+    {t:'Translate a school notice into another language', b:'help'},
+    {t:'Make a picture for a school poster (with a clear label that it is AI)', b:'help'},
+    {t:'Write a fake quote and share it as real', b:'harm'},
+    {t:'Make a fake voice message to trick a friend', b:'harm'},
+    {t:'Copy a whole AI answer into homework and call it your own', b:'harm'}
+  ];
+  const bins = {help:'Can help', harm:'Can cause harm', unsure:'Need to check'};
+  let picked = null, placed = {};
+  function renderSort(){
+    const cw = document.getElementById('cards');
+    cw.innerHTML = '';
+    cards.forEach((c,i)=>{
+      if (placed[i]) return;
+      const d = document.createElement('span');
+      d.className = 'chip' + (picked===i?' sel':'');
+      d.textContent = c.t;
+      d.onclick = ()=>{ picked = (picked===i)?null:i; renderSort(); };
+      cw.appendChild(d);
+    });
+    const bw = document.getElementById('bins');
+    bw.innerHTML = '';
+    Object.keys(bins).forEach(k=>{
+      const bin = document.createElement('div');
+      bin.className = 'bin';
+      bin.innerHTML = '<b>'+bins[k]+'</b>';
+      bin.onclick = ()=>{
+        if (picked===null) return;
+        if (cards[picked].b === k || k==='unsure') {
+          placed[picked] = k;
+          document.getElementById('sortFb').className='fb good';
+          document.getElementById('sortFb').innerHTML='Placed. Keep going.';
+        } else {
+          document.getElementById('sortFb').className='fb bad';
+          document.getElementById('sortFb').innerHTML='Think again: is this use helpful, or can it cause harm? Try another bin.';
+        }
+        if (k!=='unsure' || true) { if (placed[picked]) picked=null; }
+        renderSort();
+      };
+      Object.keys(placed).forEach(i=>{
+        if (placed[i]===k){
+          const it = document.createElement('div');
+          it.className='item'; it.textContent = cards[i].t; bin.appendChild(it);
+        }
+      });
+      bw.appendChild(bin);
+    });
+  }
+  renderSort();
+
+  // Lesson 2: game
+  const cases = [
+    {ai:'The Great Wall of China can be seen from the Moon with the naked eye.', who:'An AI chatbot.', when:'No date.', where:'No source.', key:'check', why:'A popular claim, but it is a myth. Even a common idea needs its source checked.'},
+    {ai:'Our city will have free self-driving buses everywhere by next spring.', who:'An AI chatbot.', when:'A future plan, but no date for when it was written.', where:'No source.', key:'check', why:'A future plan needs a named, recent source from the city or the bus company.'},
+    {ai:'The newest AI image tool is the best in the world, according to this article.', who:'A named reporter on a news site.', when:'Several years old.', where:'Linked news article.', key:'check', why:'The article is real but old. "Newest" and "best" change quickly. Check the date.'},
+    {ai:'Our Grade 5 class won the national robot contest in 2025, according to records.', who:'An AI chatbot.', when:'2025.', where:'No link or record.', key:'check', why:'A specific win with no record is a warning sign. It could be invented.'},
+    {ai:'The school\'s Makerspace opens at 8:00 on weekdays, according to the official school website.', who:'The school (official website).', when:'Updated this year, with a date.', where:'Official page you can open yourself.', key:'trust', why:'A named official source with a recent date. Good detectives still open the page to confirm.'},
+    {ai:'Viral photo: a famous singer was seen at a hospital. Share before it is deleted!', who:'Anonymous account.', when:'No date.', where:'No original source.', key:'check', why:'No author, no date and a rush to share. Urgency is a signal to check first.'}
+  ];
+  let gi=0, gs=0, answered=false;
+  const $ = id=>document.getElementById(id);
+  function gRender(){
+    const c=cases[gi]; answered=false;
+    $('num').textContent=gi+1; $('score').textContent=gs; $('bar').style.width=(gi/cases.length*100)+'%';
+    $('ans').innerHTML='<b>🤖 AI says:</b> "'+c.ai+'"';
+    $('clues').innerHTML='<b>WHO?</b> '+c.who+'<br><b>WHEN?</b> '+c.when+'<br><b>WHERE?</b> '+c.where;
+    $('gFb').className='fb'; $('gFb').innerHTML='';
+    $('bCheck').disabled=false; $('bTrust').disabled=false; $('gNext').disabled=true;
+    $('gNext').textContent = gi===cases.length-1 ? 'See my result' : 'Next case →';
+  }
+  function gAnswer(choice){
+    if(answered) return; answered=true;
+    const c=cases[gi]; const right = choice===c.key;
+    if(right) gs++;
+    $('score').textContent=gs;
+    $('gFb').className='fb '+(right?'good':'bad');
+    $('gFb').innerHTML=(right?'<b>Correct detective work!</b> ':'<b>Not quite.</b> The answer is <b>'+(c.key==='check'?'Check the source first':'Trust it')+'</b>. ')+c.why;
+    $('bCheck').disabled=true; $('bTrust').disabled=true; $('gNext').disabled=false;
+  }
+  $('bCheck').onclick=()=>gAnswer('check');
+  $('bTrust').onclick=()=>gAnswer('trust');
+  $('gNext').onclick=()=>{
+    if(gi<cases.length-1){gi++; gRender();}
+    else{
+      $('ans').innerHTML='<b>Case file closed.</b> You scored '+gs+' out of '+cases.length+'.';
+      $('clues').innerHTML='Detective rule: WHO, WHEN, WHERE, WHY. Use it on every source.';
+      $('bCheck').style.display='none'; $('bTrust').style.display='none'; $('gNext').style.display='none';
+      $('gRestart').style.display='inline-block'; $('bar').style.width='100%';
+      $('gFb').className='fb'; $('gFb').innerHTML='';
+    }
+  };
+  $('gRestart').onclick=()=>{
+    gi=0; gs=0; $('bCheck').style.display=''; $('bTrust').style.display='';
+    $('gNext').style.display=''; $('gRestart').style.display='none'; gRender();
+  };
+  gRender();
+
+  // Check it live
+  document.querySelectorAll('[data-d]').forEach(b=>b.addEventListener('click',()=>{
+    const d=b.dataset.d;
+    const checks=[...document.querySelectorAll('#s4 .checklist input')].filter(x=>x.checked).length;
+    const fb=$('liveFb'); fb.style.display='block';
+    if(d==='Trust' && checks<4){ fb.className='fb bad'; fb.innerHTML='Not yet. Detectives who trust a claim complete at least four checks. You completed '+checks+'.'; }
+    else if(d==='Trust'){ fb.className='fb good'; fb.innerHTML='Good work. You checked it four or more ways. Write the source in your notes.'; }
+    else if(d==='Check more'){ fb.className='fb good'; fb.innerHTML='Good detective choice. Keep checking until you can answer WHO, WHEN and WHERE.'; }
+    else { fb.className='fb good'; fb.innerHTML='Good choice. Not every claim is worth using. Move on to a better source.'; }
+  }));
+
+  // Good choices
+  const choiceAns = {1:1, 2:1, 3:1};
+  const choiceWhy = {
+    1:'Never share birthday or school details to get a prize. Close the page and tell an adult.',
+    2:'Do not share your home address with any AI tool. A helpful answer does not need it.',
+    3:'Pause. Urgency is a trick to stop you thinking. Close the pop-up.'
+  };
+  document.querySelectorAll('[data-c]').forEach(row=>{
+    const id=row.dataset.c;
+    row.querySelectorAll('button').forEach((b,idx)=>b.addEventListener('click',()=>{
+      if(row.dataset.done) return; row.dataset.done='1';
+      row.querySelectorAll('button').forEach(x=>x.disabled=true);
+      const right = idx===1;
+      b.classList.add('on');
+      const fb=$('choiceFb');
+      fb.className='fb '+(right?'good':'bad');
+      fb.innerHTML=(right?'Safe choice! ':'Pause and think. ')+choiceWhy[id];
+    }));
+  });
+
+  // Exhibition rule
+  $('mk').onclick=()=>{
+    const r1=$('r1').value.trim()||'a source I have checked';
+    const r2=$('r2').value.trim()||'WHO, WHEN and WHERE';
+    const r3=$('r3').value.trim()||'a trusted adult';
+    const el=$('rule'); el.style.display='block';
+    el.innerHTML='<b>My rule:</b> Every fact I use will have '+r1+'. I will check '+r2+' before I trust an AI answer. If I am not sure, I will ask '+r3+' before I share.';
+  };
+  $('cp').onclick=()=>{
+    const t=$('rule').textContent.replace('My rule:','').trim();
+    if(!t){ return; }
+    try{ navigator.clipboard.writeText(t); }catch(e){}
+  };
+  // Why adults worry: class sort
+  const whyCards = [
+    {t:'I might stop thinking for myself and just copy AI answers', b:'learner'},
+    {t:'I might not learn how to explain my own ideas', b:'learner'},
+    {t:'I might believe wrong facts and not notice', b:'learner'},
+    {t:'I might spend too much time on screens instead of practising', b:'learner'},
+    {t:'Someone might trick me with a fake voice or picture', b:'safety'},
+    {t:'I might share my name, school or photos with a website or chat', b:'safety'},
+    {t:'Someone might share a fake picture of me', b:'safety'},
+    {t:'An AI chat might keep what I type', b:'safety'}
+  ];
+  const whyBins = {learner:'Worries about me as a learner', safety:'Worries about my safety and privacy'};
+  let whyPicked = null; const whyPlaced = {};
+  function renderWhy(){
+    const cw = document.getElementById('whyCards'); cw.innerHTML = '';
+    whyCards.forEach((c,i)=>{
+      if (whyPlaced[i]) return;
+      const d = document.createElement('span');
+      d.className = 'chip' + (whyPicked===i?' sel':'');
+      d.textContent = c.t;
+      d.onclick = ()=>{ whyPicked = (whyPicked===i)?null:i; renderWhy(); };
+      cw.appendChild(d);
+    });
+    const bw = document.getElementById('whyBins'); bw.innerHTML = '';
+    Object.keys(whyBins).forEach(k=>{
+      const bin = document.createElement('div');
+      bin.className = 'bin';
+      bin.innerHTML = '<b>'+whyBins[k]+'</b>';
+      bin.onclick = ()=>{
+        if (whyPicked===null) return;
+        whyPlaced[whyPicked] = k;
+        const fb = document.getElementById('whyFb');
+        fb.className = 'fb good';
+        fb.innerHTML = 'Placed. Ask the class: could this one also fit the other column? Why?';
+        whyPicked = null;
+        renderWhy();
+      };
+      Object.keys(whyPlaced).forEach(i=>{
+        if (whyPlaced[i]===k){ const it = document.createElement('div'); it.className='item'; it.textContent = whyCards[i].t; bin.appendChild(it); }
+      });
+      bw.appendChild(bin);
+    });
+  }
+  renderWhy();
+  // Friendly extras: emoji tabs, star collection, cheers
+  const tabEmoji = {s0:'🏠', s7:'🤔', s8:'🔍', s1:'🖼️', s2:'🗂️', s3:'🕵️', s4:'✅', s5:'🛡️', s6:'🏆'};
+  const visited = new Set(['s0']);
+  let starCount = 0;
+  navBtns.forEach(b=>{ const e = tabEmoji[b.dataset.t]; if (e) b.textContent = e + ' ' + b.textContent.trim(); });
+  function addStar(n){ starCount += n; drawStars(); }
+  function drawStars(){
+    const s = '⭐ Stars: ' + starCount + '  ·  Tabs visited: ' + visited.size + ' of ' + navBtns.length;
+    document.getElementById('stars').textContent = s;
+    const sl = document.getElementById('starLine'); if (sl) sl.textContent = '';
+  }
+  function cheer(msg){
+    const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 1600);
+  }
+  navBtns.forEach(b=>b.addEventListener('click',()=>{
+    const id = b.dataset.t;
+    if (!visited.has(id)) { visited.add(id); addStar(1); cheer('⭐ New tab explored!'); }
+    drawStars();
+  }));
+  document.addEventListener('click', e=>{
+    if (!e.target.closest || !e.target.closest('button.act')) return;
+    setTimeout(()=>{
+      const good = document.querySelector('section.show .fb.good[style*="block"], section.show .fb.good:not([style*="none"])');
+      if (good && good.innerText.trim()) { addStar(1); cheer('🎉 Great detective work!'); }
+    }, 250);
+  });
+  // Emoji on headings, answer buttons and boxes
+  const secEmoji = {s0:'🏠', s1:'🖼️', s2:'🗂️', s3:'🕵️', s4:'✅', s5:'🛡️', s6:'🏆', s7:'🤔', s8:'🔍'};
+  document.querySelectorAll('main section').forEach(sec=>{
+    const h = sec.querySelector('h2');
+    if (h && secEmoji[sec.id]) h.textContent = secEmoji[sec.id] + ' ' + h.textContent;
+  });
+  document.querySelectorAll('button.act').forEach(b=>{
+    const t = b.textContent.trim();
+    const map = {'Real':'🙂 Real','AI':'🤖 AI','Close it and tell an adult':'👋 Close it and tell an adult','Do not share it and tell an adult':'🚫 Do not share it and tell an adult','Enter my details':'😬 Enter my details','Type my address':'😬 Type my address','Click quickly':'😬 Click quickly','Pause and close it':'✋ Pause and close it','Trust it':'👍 Trust it','Check more':'🔎 Check more','Do not use it':'🚫 Do not use it'};
+    if (map[t]) b.textContent = map[t];
+  });
+  document.querySelectorAll('.box').forEach(bx=>{
+    if (!bx.querySelector('.emo')) { const s = document.createElement('span'); s.className='emo'; s.textContent='💡 '; bx.insertBefore(s, bx.firstChild); }
+  });
+  // Flip it: random fun prompts
+  const flips = [
+    'Adults might be wrong to worry, because I can check things before I believe them. My superpower is...',
+    'AI could be my superpower for learning if I use it to explain things, not to do my homework for me.',
+    'Maybe adults worry too much about... but I can prove them wrong by checking before I share!',
+    'My AI superpower would be: ...',
+    'If I were the boss of AI, I would make sure it always...'
+  ];
+  const flipBtn = document.getElementById('flipBtn');
+  if (flipBtn) flipBtn.addEventListener('click', ()=>{
+    const out = document.getElementById('flipOut');
+    out.style.display = 'block';
+    out.innerHTML = '<b>🃏 Your flip card:</b> "' + flips[Math.floor(Math.random()*flips.length)] + '"';
+    addStar(1);
+    cheer('🎲 Flip card spun!');
+  });
+  // Quote or AI Mode answer: sort activity
+  const aiCards = [
+    {t:'You can see the exact words and the person who wrote them.', b:'quote'},
+    {t:'The words are newly written. One sentence may combine several pages.', b:'ai'},
+    {t:'One source, one date, one author.', b:'quote'},
+    {t:'Several sources, and the links can change each time you ask.', b:'ai'},
+    {t:'What you read is what the author wrote.', b:'quote'},
+    {t:'The answer can miss something, mix things up, or state a wrong fact confidently.', b:'ai'}
+  ];
+  const aiBinNames = {quote:'📚 A quote', ai:'🤖 An AI Mode answer'};
+  let aiPicked = null; const aiPlaced = {};
+  function renderAi(){
+    const cw = document.getElementById('aiCards'); cw.innerHTML = '';
+    aiCards.forEach((c,i)=>{
+      if (aiPlaced[i]) return;
+      const d = document.createElement('span');
+      d.className = 'chip' + (aiPicked===i?' sel':'');
+      d.textContent = c.t;
+      d.onclick = ()=>{ aiPicked = (aiPicked===i)?null:i; renderAi(); };
+      cw.appendChild(d);
+    });
+    const bw = document.getElementById('aiBins'); bw.innerHTML = '';
+    Object.keys(aiBinNames).forEach(k=>{
+      const bin = document.createElement('div');
+      bin.className = 'bin';
+      bin.innerHTML = '<b>'+aiBinNames[k]+'</b>';
+      bin.onclick = ()=>{
+        if (aiPicked===null) return;
+        const fb = document.getElementById('aiFb');
+        if (aiCards[aiPicked].b === k) {
+          aiPlaced[aiPicked] = k;
+          fb.className = 'fb good';
+          fb.innerHTML = '⭐ Right box! Keep going.';
+          addStar(1);
+        } else {
+          fb.className = 'fb bad';
+          fb.innerHTML = 'Think again. Which one can you check by clicking one link, and which one is a new summary?';
+        }
+        aiPicked = null;
+        renderAi();
+      };
+      Object.keys(aiPlaced).forEach(i=>{
+        if (aiPlaced[i]===k){ const it = document.createElement('div'); it.className='item'; it.textContent = aiCards[i].t; bin.appendChild(it); }
+      });
+      bw.appendChild(bin);
+    });
+  }
+  renderAi();
+  drawStars();
+</script>
+</body>
+</html>
