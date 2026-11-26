@@ -150,6 +150,34 @@
   <button id="aDark" aria-pressed="false">🌙 Dark mode</button>
   <button id="aBig" aria-pressed="false">🔠 Bigger text</button>
   <button id="aEasy" aria-pressed="false">🧸 Easy English</button>
+  <button id="aJp" aria-pressed="false">🇯🇵 日本語ヒント</button>
+</div>
+<div id="jpPanel" class="box" style="display:none; margin:12px auto; max-width:820px;">
+  <h3>日本語ヒント（かんたん）</h3>
+  <p><b>ことば</b></p>
+  <ul>
+    <li><b>生成AI</b>（せいせいエーアイ）：文章・画像・音声を新しく作るAI</li>
+    <li><b>チャットボット</b>：話しかけたり、文字で質問したりできるプログラム</li>
+    <li><b>学習データ</b>：AIが学ぶときに使った、たくさんの例</li>
+    <li><b>まちがい（hallucination）</b>：自信があるように見えて、まちがっている答え</li>
+    <li><b>情報源（source）</b>：その情報が、もともとどこから来たか</li>
+    <li><b>引用（quote）</b>：本や人の言葉を、そのまま使うこと</li>
+    <li><b>AIモード</b>：Google検索で、AIがたくさんのページをまとめた回答</li>
+    <li><b>確かめる（check）</b> ／ <b>信じる（trust）</b></li>
+    <li><b>個人情報</b>：名前・住所・電話番号・写真など、自分がわかる情報</li>
+    <li><b>WHO / WHEN / WHERE / WHY</b>：だれが ／ いつ ／ どこで ／ なぜ</li>
+  </ul>
+  <p><b>タブのめあて</b></p>
+  <ul>
+    <li>なぜおとなは心配するの？：AIを使うとき、どんなことが心配なのかを考えよう。</li>
+    <li>Google AI Mode：AIのまとめは、一つの引用ではない。確かめてから使おう。</li>
+    <li>Real or AI?：本物かAIか、見分けてみよう。</li>
+    <li>Sort it：AIには、役に立つ使い方と、害になる使い方がある。</li>
+    <li>Detective game：AIはまちがえることがある。信じる前に確かめよう。</li>
+    <li>Check it live：2つの情報源で、同じことが書いてあるか確かめよう。</li>
+    <li>Good choices：名前や住所などの個人情報は入力しない。困ったら大人に相談。</li>
+    <li>PYP Exhibition Rule：発表する事実には、だれ・いつ・どこを書こう。</li>
+  </ul>
 </div>
 <nav>
   <button class="active" data-t="s0">Start</button>
@@ -680,6 +708,13 @@
       if (box.dataset.orig === undefined) box.dataset.orig = box.innerHTML;
       box.innerHTML = easyOn ? '<b>Big idea:</b> ' + easyText[id] : box.dataset.orig;
     });
+  });
+  // Japanese language help panel
+  const aJp = document.getElementById('aJp');
+  aJp.addEventListener('click', ()=>{
+    const on = aJp.getAttribute('aria-pressed') !== 'true';
+    aJp.setAttribute('aria-pressed', on);
+    document.getElementById('jpPanel').style.display = on ? 'block' : 'none';
   });
   drawStars();
 </script>
