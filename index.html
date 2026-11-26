@@ -114,6 +114,9 @@
   .bin { background:#fbfff5; border-color:#7cc242; }
   .fb.good { background:#eefbe6; border-left-color:#2e8b57; }
   #toast { background:#2e8b57; }
+  /* Key word highlight: hover on computers, tap on tablets and phones */
+  .box b, .q b { cursor:pointer; border-radius:6px; padding:0 3px; transition:background .2s, color .2s; }
+  .box b:hover, .q b:hover, .box b.hl, .q b.hl { background:#fff176; color:#222; }
 </style>
 </head>
 <body>
@@ -623,6 +626,8 @@
     });
   }
   renderAi();
+  // Tap or click a key word to highlight it
+  document.querySelectorAll('.box b, .q b').forEach(b=>b.addEventListener('click',()=>b.classList.toggle('hl')));
   drawStars();
 </script>
 </body>
